@@ -16,7 +16,7 @@ public class Game {
 		answer = s;
 		char[] array = s.toCharArray();
 		for (int i = 0; i < array.length; i++) {
-			if (array[i] != ' ') {
+			if ((array[i] != ' ') || (!(array[i] <= 57) && !(array[i] >= 48))) {
 				array[i] = '_';
 			}
 		}
