@@ -1,29 +1,34 @@
 package logic;
 
-import java.util.ArrayList;
-
 import lib.ConsoleIO;
 
 public class Game {
-	private static ArrayList<Character> alreadyGuessed = new ArrayList<Character>();
+	private static char[] guesses;
+	private static int guessNum = 0;
 	private static String s;
-	private static final String answer = s;
+	private static String answer;
 	private static char guess;
 	private static int guessesLeft = 6;
 	private static String[] man;
+	private static boolean quit = false, answered = false;
 
 	private static void config() {
+		answer = s;
 		char[] array = s.toCharArray();
 		for (int i = 0; i < array.length; i++) {
 			if (array[i] != ' ') {
 				array[i] = '_';
 			}
 		}
-		s = array.toString();
+		s = "";
+		for (char c : array) {
+			s += c;
+		}
 	}
 
 	private static boolean goodGuess() {
-		for (char c : answer.toCharArray()) {
+		char[] a = answer.toCharArray();
+		for (char c : a) {
 			if (c == guess) {
 				return true;
 			}
@@ -31,70 +36,207 @@ public class Game {
 		return false;
 	}
 
-	private static void guess() {
-		System.out.println(s);
-		boolean fail = true;
+	private static void printMan(boolean tried) {
+		boolean loop = true;
+		boolean done = false;
 		do {
-			guess = ConsoleIO.promptForChar("Enter your guess in lowercase:", 'a', 'z');
-			for (Character character : alreadyGuessed) {
-				if (guess != character) {
-					fail = false;
-					alreadyGuessed.add(guess);
-				} else {
-					System.out.println("You already guessed that.");
-				}
-			}
-		} while (fail);
+			if (!goodGuess() || done) {
+				char[] c = null;
+				switch (guessesLeft) {
+				case 5:
 
+					c = man[2].toCharArray();
+					c[3] = 'o';
+					man[2] = c.toString();
+
+					break;
+				case 4:
+					c = man[3].toCharArray();
+					c[3] = '|';
+					man[3] = c.toString();
+					break;
+				case 3:
+					c = man[3].toCharArray();
+					c[2] = '/';
+					man[3] = c.toString();
+					break;
+				case 2:
+					c = man[3].toCharArray();
+					c[4] = '\\';
+					man[3] = c.toString();
+					break;
+				case 1:
+					c = man[4].toCharArray();
+					c[2] = '/';
+					man[4] = c.toString();
+					break;
+				case 0:
+					c = man[4].toCharArray();
+					c[4] = '\\';
+					man[4] = c.toString();
+					break;
+				default:
+					break;
+				}
+
+				switch (guessesLeft) {
+				case 5:
+					man[2] = "";
+					for (char ch : c) {
+						man[2] += ch;
+					}
+					break;
+
+				case 4:
+				case 3:
+				case 2:
+					man[3] = "";
+					for (char ch : c) {
+						man[3] += ch;
+					}
+					break;
+				case 1:
+				case 0:
+					man[4] = "";
+					for (char ch : c) {
+						man[4] += ch;
+					}
+					break;
+				default:
+					break;
+				}
+
+				guessesLeft--;
+
+			} else if (tried) {
+				loop = false;
+				done = true;
+			}
+		} while (!loop);
 	}
 
-	private static void printMan() {
-		if (!goodGuess()) {
-			switch (guessesLeft) {
-			case 6:
-				// addHead();
-				break;
-			case 5:
-				// addBody();
-				break;
-			case 4:
-				// addArmL();
-				break;
-			case 3:
-				// addArmR();
-				break;
-			case 2:
-				// addLegL();
-				break;
-			case 1:
-				// addLegR();
-				break;
-			default:
-				break;
+	private static void replaceChars() {
+		char[] anser = answer.toCharArray();
+		char[] ss = s.toCharArray();
+		for (int i = 0; i < anser.length; i++) {
+			if (anser[i] == guess) {
+				ss[i] = guess;
 			}
-			guessesLeft--;
-			for (String s : man) {
-				System.out.println(s);
-			}
+		}
+		s = "";
+		for (char c : ss) {
+			s += c;
 		}
 	}
 
 	public static void run() {
-		setup();
-		config();
-		boolean condition = false;
+		boolean play = true;
 		do {
-			guess();
-			printMan();
-			if (s.equals(answer)) {
-				condition = true;
+			setup();
+			config();
+			boolean condition = false;
+			do {
+				for (String s : man) {
+					System.out.println(s);
+				}
+				turn();
+				if (!quit) {
+					printMan(false);
+					if ((guessesLeft <= 0)) {
+						System.out.println("You lose! the answer was:\n" + answer);
+						condition = true;
+					} else if (s.equals(answer)) {
+						System.out.println("You win!");
+						condition = true;
+					}
+				} else if (answered) {
+					System.out.println("You win!");
+					condition = true;
+					printMan(true);
+				}
+			} while (!condition);
+			if (!ConsoleIO.promptForBool("Would you like to play again? y/n", "y", "n")) {
+				System.out.println("Thanks for playing.");
+				play = false;
 			}
-		} while (!condition);
+
+		} while (play);
 
 	}
 
 	private static void setup() {
+		boolean f = true;
+		quit = false;
+		guessesLeft = 6;
+		guessNum = 0;
+		guesses = new char[27];
+		man = new String[] { "   _____", "   |   |", "       |", "       |", "       |", "     __|_ " };
 		System.out.println("Player 2 look away.");
-		s = ConsoleIO.promptForInput("Player 1 enter your answer:", false);
+		do {
+			s = ConsoleIO.promptForInput("Player 1 enter your answer:", false);
+			f = s == null;
+			if (f) {
+				System.out.println("It has to be a string. Not null.");
+			}
+		} while (f);
+	}
+
+	private static void turn() {
+		System.out.println(s);
+		System.out.println(guessesLeft + " guesses left");
+		boolean fail = true;
+
+		switch (ConsoleIO.promptForMenuSelection(new String[] { "Solve", "Guess" }, true)) {
+
+		case 1:
+			String ges = ConsoleIO.promptForInput("What is the answer?", false);
+			if (ges.equals(answer)) {
+				s = ges;
+				answered = true;
+				quit = true;
+			} else {
+				System.out.println("Thats not it!");
+			}
+
+			break;
+		case 2:
+			do {
+				guess = ConsoleIO.promptForChar("Enter your guess in lowercase:", 'a', 'z');
+
+				if (goodGuess()) {
+
+					replaceChars();
+
+					fail = false;
+					guessNum++;
+					guesses[guessNum] = guess;
+
+				} else {
+					boolean f = true;
+					for (char guesse : guesses) {
+
+						if (guess == guesse) {
+							break;
+						} else {
+							f = false;
+						}
+					}
+					if (f) {
+						System.out.println("You already guessed that.");
+
+					} else {
+						System.out.println("Wrong.");
+						fail = false;
+						guessNum++;
+						guesses[guessNum] = guess;
+
+					}
+				}
+			} while (fail);
+			break;
+		default:
+			quit = true;
+			break;
+		}
 	}
 }
