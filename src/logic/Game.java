@@ -8,7 +8,7 @@ public class Game {
 	private static String s;
 	private static String answer;
 	private static char guess;
-	private static int guessesLeft = 6;
+	private static int guessesLeft = 5;
 	private static String[] man;
 	private static boolean quit = false, answered = false;
 
@@ -20,16 +20,13 @@ public class Game {
 				array[i] = '_';
 			}
 		}
-		s = "";
-		for (char c : array) {
-			s += c;
-		}
+		s = new String(array);
 	}
 
 	private static boolean goodGuess() {
 		char[] a = answer.toCharArray();
 		for (char c : a) {
-			if (c == guess) {
+			if ((c == guess) || (Character.toLowerCase(c) == guess)) {
 				return true;
 			}
 		}
@@ -119,14 +116,11 @@ public class Game {
 		char[] anser = answer.toCharArray();
 		char[] ss = s.toCharArray();
 		for (int i = 0; i < anser.length; i++) {
-			if (anser[i] == guess) {
+			if ((anser[i] == guess) || (Character.toLowerCase(anser[i]) == guess)) {
 				ss[i] = guess;
 			}
 		}
-		s = "";
-		for (char c : ss) {
-			s += c;
-		}
+		s = new String(ss);
 	}
 
 	public static void run() {
@@ -136,13 +130,12 @@ public class Game {
 			config();
 			boolean condition = false;
 			do {
-				for (String s : man) {
-					System.out.println(s);
-				}
+
 				turn();
+
 				if (!quit) {
-					printMan(false);
-					if ((guessesLeft <= 0)) {
+					// printMan(false);
+					if ((guessesLeft < 0)) {
 						System.out.println("You lose! the answer was:\n" + answer);
 						condition = true;
 					} else if (s.equals(answer)) {
@@ -153,6 +146,9 @@ public class Game {
 					System.out.println("You win!");
 					condition = true;
 					printMan(true);
+				}
+				for (String s : man) {
+					System.out.println(s);
 				}
 			} while (!condition);
 			if (!ConsoleIO.promptForBool("Would you like to play again? y/n", "y", "n")) {
@@ -167,7 +163,7 @@ public class Game {
 	private static void setup() {
 		boolean f = true;
 		quit = false;
-		guessesLeft = 6;
+		guessesLeft = 5;
 		guessNum = 0;
 		guesses = new char[27];
 		man = new String[] { "   _____", "   |   |", "       |", "       |", "       |", "     __|_ " };
@@ -182,11 +178,13 @@ public class Game {
 	}
 
 	private static void turn() {
+
+		// TODO not let muslitple guess of same char
 		System.out.println(s);
 		System.out.println(guessesLeft + " guesses left");
 		boolean fail = true;
 
-		switch (ConsoleIO.promptForMenuSelection(new String[] { "Solve", "Guess" }, true)) {
+		switch (ConsoleIO.promptForMenuSelection(new String[] { "Solve", "Guess", "Surrender" }, false)) {
 
 		case 1:
 			String ges = ConsoleIO.promptForInput("What is the answer?", false);
@@ -196,6 +194,8 @@ public class Game {
 				quit = true;
 			} else {
 				System.out.println("Thats not it!");
+				guessesLeft = 0;
+				fail = true;
 			}
 
 			break;
@@ -238,5 +238,6 @@ public class Game {
 			quit = true;
 			break;
 		}
+		printMan(false);
 	}
 }
