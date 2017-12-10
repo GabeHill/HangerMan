@@ -25,9 +25,14 @@ public class Game {
 
 	private static boolean goodGuess() {
 		char[] a = answer.toCharArray();
-		for (char c : a) {
-			if ((c == guess) || (Character.toLowerCase(c) == guess)) {
-				return true;
+		for (char guesse : guesses) {
+			for (char c : a) {
+				if (c != guesse) {
+					if (((c == guess) || (Character.toLowerCase(c) == guess))) {
+						// guesses[guessNum + 1] = c;
+						return true;
+					}
+				}
 			}
 		}
 		return false;
@@ -162,10 +167,15 @@ public class Game {
 
 	private static void setup() {
 		boolean f = true;
+		answered = false;
 		quit = false;
 		guessesLeft = 5;
 		guessNum = 0;
 		guesses = new char[27];
+
+		for (int i = 0; i < guesses.length; i++) {
+			guesses[i] = '@';
+		}
 		man = new String[] { "   _____", "   |   |", "       |", "       |", "       |", "     __|_ " };
 		System.out.println("Player 2 look away.");
 		do {
