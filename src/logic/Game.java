@@ -138,7 +138,7 @@ public class Game {
 
 				turn();
 
-				if (!quit) {
+				if (quit) {
 					// printMan(false);
 					if ((guessesLeft < 0)) {
 						System.out.println("You lose! the answer was:\n" + answer);
@@ -207,6 +207,7 @@ public class Game {
 				guessesLeft = 0;
 				fail = true;
 			}
+			printMan(false);
 
 			break;
 		case 2:
@@ -226,28 +227,30 @@ public class Game {
 					for (char guesse : guesses) {
 
 						if (guess == guesse) {
-							break;
-						} else {
 							f = false;
+							break;
 						}
 					}
-					if (f) {
+					if (!f) {
 						System.out.println("You already guessed that.");
 
 					} else {
 						System.out.println("Wrong.");
 						fail = false;
+
 						guessNum++;
 						guesses[guessNum] = guess;
 
 					}
 				}
 			} while (fail);
+			printMan(false);
+
 			break;
 		default:
+			guessesLeft = -1;
 			quit = true;
 			break;
 		}
-		printMan(false);
 	}
 }
